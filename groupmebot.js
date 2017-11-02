@@ -21,7 +21,7 @@ app.post('/slackbot', function(req, res){
 
 	if (message.text === "@testbank") {
 	    console.log("Message received: " + message.text);
-	    testBankResponse = "<Test Bank: Test Bank usernames and passwords>"
+	    testBankResponse = "Test Bank: <test bank usernames and passwords>"
 
 	    sendMessage(testBankResponse);
 	}
