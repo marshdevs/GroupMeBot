@@ -1,54 +1,82 @@
-var express = require('express');
-var request = require('request');
-var app = express()
+var https = require('https');
 
-function sendMessage(res) {
-    var jsonRes = {
-	"bot_id":"<bot_id>",
-	"text":res
+const information = {
+  "@testbank": "<testbank_info>",
+  "@carport": "<carport_doc>",
+  "@wifi": "<wifi_info>",
+  "@pledges": "<pledges_doc>"
+};
+
+function getPromise(msg) {
+  return new Promise((resolve, reject) => {
+    var postData = {
+      "bot_id": "<bot_id>",
+      "text": msg
     };
-    request.post(' https://api.groupme.com/v3/bots/post', {json: jsonRes}, function(error, response, body){
-	if (!error && response.statusCode == 200) {
-	    console.log(body);
-	}
+        
+    const options = {
+      host: 'api.groupme.com',
+      path: '/v3/bots/post',
+      method: 'POST',
+      headers: {
+        'Content-Length': Buffer.byteLength(JSON.stringify(postData))
+      }
+    };
+        
+    const req = https.request(options, (res) => {
+      resolve({
+        'statusCode': 200,
+        'body': msg,
+        'isBase64Encoded': false,
+        'headers': {}
+      });
     });
+        
+    req.on('error', (e) => {
+      reject({
+        'statusCode': 200,
+        'body': e.message,
+        'isBase64Encoded': false,
+        'headers': {}
+      });
+    });
+        
+    // send the request
+    req.write(JSON.stringify(postData));
+    req.end();
+      
+    console.log(JSON.stringify(postData));
+  });
 }
 
-app.post('/slackbot', function(req, res){
-    console.log('Received a POST request.');
-    req.on('data', function(chunk) {
-	var message = JSON.parse(chunk.toString());
+exports.handler = async (event) => {
+  console.log(event);
+    
+  var msg = JSON.parse(event.body);
+  var response = "";
 
-	if (message.text === "@testbank") {
-	    console.log("Message received: " + message.text);
-	    testBankResponse = "Test Bank: <test bank usernames and passwords>"
-
-	    sendMessage(testBankResponse);
-	}
-
-	if (message.text === "@carport") {
-	    console.log("Message received: " + message.text);
-	    carPortResponse = "Carport: <car port map link>";
-	    
-	    sendMessage(carPortResponse);
-	}
-
-	if (message.text === "@wifi") {
-	    console.log("Message received: " + message.text);
-	    wifiResponse = "Wifi: <network names and passwords>";
-	    
-	    sendMessage(wifiResponse);
-	}
-
-	if (message.text === "@pledges") {
-	    console.log("Message received: " + message.text);
-	    pledgesResponse = "Pledges: <link to list of new members>";
-
-	    sendMessage(pledgesResponse);
-	}
-    });
-});
-
-app.listen(6969, function(){
-    console.log("Listening on Port <port_num>...");
-});
+	if (msg.text === "@testbank") {
+    console.log("Message received: " + msg.text);
+  	response = "Test Bank: " + information[msg.text];
+  } else if (msg.text === "@carport") {
+    console.log("Message received: " + msg.text);
+  	response = "Carport: " + information[msg.text];
+  } else if (msg.text === "@wifi") {
+    console.log("Message received: " + msg.text);
+  	response = "Wifi: " + information[msg.text];
+  } else if (msg.text === "@pledges") {
+    console.log("Message received: " + msg.text);
+  	response = information[msg.text];
+  }
+     
+  if (response !== "") {
+    return getPromise(response);
+  }
+  
+  return {
+    'statusCode': 200,
+    'body': 'Success',
+    'isBase64Encoded': false,
+    'headers': {}
+  };
+};
