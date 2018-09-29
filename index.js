@@ -55,18 +55,18 @@ exports.handler = async (event) => {
   var msg = JSON.parse(event.body);
   var response = "";
 
-	if (msg.text === "@testbank") {
+  if (msg.text === "@testbank") {
     console.log("Message received: " + msg.text);
-  	response = "Test Bank: " + information[msg.text];
+    response = "Test Bank: " + information[msg.text];
   } else if (msg.text === "@carport") {
     console.log("Message received: " + msg.text);
-  	response = "Carport: " + information[msg.text];
+    response = "Carport: " + information[msg.text];
   } else if (msg.text === "@wifi") {
     console.log("Message received: " + msg.text);
-  	response = "Wifi: " + information[msg.text];
+    response = "Wifi: " + information[msg.text];
   } else if (msg.text === "@pledges") {
     console.log("Message received: " + msg.text);
-  	response = information[msg.text];
+    response = information[msg.text];
   }
      
   if (response !== "") {
